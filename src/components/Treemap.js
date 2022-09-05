@@ -19,9 +19,9 @@ function Treemap({ width, height, data }){
           .paddingInner(3)
           (root);
       
-      const color = d3.scaleLinear()
-      .domain([0, 50])
-      .range(["#00000", "#FF0000"]);
+      const color = d3.scaleThreshold()
+      .domain([0, 2, 4, 6, 8])
+      .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
 
       // Select the nodes
       var nodes = svg
@@ -35,7 +35,7 @@ function Treemap({ width, height, data }){
           .attr('y', d => d.y0)
           .attr('width', d => d.x1 - d.x0)
           .attr('height', d => d.y1 - d.y0)
-          .style("fill", d => color(d.data.size))
+          .style("fill", d => color(d.data.value))
 
       nodes.exit().remove()
 
@@ -70,14 +70,13 @@ function Treemap({ width, height, data }){
       // add the parent node titles
       svg
       .selectAll("titles")
-      .data(root.descendants().filter(function(d){return d.depth === 1}))
+      .data(root.descendants().filter(d => d.depth === 1))
       .enter()
       .append("text")
           .attr("x", d => d.x0)
           .attr("y", d => d.y0 + 21)
           .text(d => d.data.name)
-          .attr("font-size", "10px")
-          .attr("fill",  d => color(d.data.name));
+          .attr("font-size", "10px");
   }
 
   useEffect(() => {

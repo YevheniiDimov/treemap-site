@@ -35,8 +35,8 @@ function App() {
             <li key={i}>
               <h3>{region.name}</h3>
               <ul>
-                {region.children.map(centre =>
-                  <li key={centre.id}>{centre.id} — {centre.size} people</li>
+                {region.children.map((centre, j) =>
+                  <li key={j}>{centre.id} — {centre.size} people</li>
                 )}
               </ul>
             </li>
