@@ -5,18 +5,24 @@ function Treemap({ width, height, data }){
     const ref = useRef();
     
     const draw = () => {
+      console.log('Data');
+      console.log(data);
       const svg = d3.select(ref.current);
       svg.attr('width', width).attr('height', height);
 
-      // Give the data to this cluster layout:
-      var root = d3.hierarchy({'children': data}).sum(d => d.size);
+      let hierarchy = {'children': data};
+      console.log('Hierarchy'); 
+      console.log(hierarchy);
 
+      // Give the data to this cluster layout:
+      var root = d3.hierarchy(hierarchy).sum(d => d.size);
+  
       // initialize treemap
       d3.treemap()
           .size([width, height])
           .paddingTop(28)
-          .paddingRight(7)
-          .paddingInner(3)
+          .paddingRight(5)
+          .paddingInner(2)
           (root);
       
       const color = d3.scaleThreshold()
@@ -25,7 +31,7 @@ function Treemap({ width, height, data }){
 
       // Select the nodes
       var nodes = svg
-        .selectAll("rect")
+        .selectAll("g")
         .data(root.leaves());
 
       // draw rectangles
@@ -35,7 +41,7 @@ function Treemap({ width, height, data }){
           .attr('y', d => d.y0)
           .attr('width', d => d.x1 - d.x0)
           .attr('height', d => d.y1 - d.y0)
-          .style("fill", d => color(d.data.value))
+          .style("fill", d => "#30CC5A") //color(d.data.value)
 
       nodes.exit().remove()
 
@@ -49,7 +55,7 @@ function Treemap({ width, height, data }){
           .append("text")
           .attr("x", d => d.x0)
           .attr("y", d => d.y0)
-          .text(d =>  d.data.name)
+          .text(d =>  d.data.offices_n)
           .attr("font-size", "5px")
           .attr("fill", "white")
       
@@ -63,8 +69,8 @@ function Treemap({ width, height, data }){
           .append("text")
           .attr("x", d => (d.x0 + d.x1)/2 - 10)
           .attr("y", d => (d.y0 + d.y1)/2 + 10)
-          .text(d => d.data.size < 5 ? "" : d.data.id)
-          .attr("font-size", "10px")
+          .text(d => d.data.size < 5 ? "" : d.data.id_offices)
+          .attr("font-size", "15px")
           .attr("fill", "white")
   
       // add the parent node titles
@@ -75,8 +81,8 @@ function Treemap({ width, height, data }){
       .append("text")
           .attr("x", d => d.x0)
           .attr("y", d => d.y0 + 21)
-          .text(d => d.data.name)
-          .attr("font-size", "10px");
+          .text(d => d.data.region_name)
+          .attr("font-size", "15px");
   }
 
   useEffect(() => {
