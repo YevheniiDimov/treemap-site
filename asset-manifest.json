@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/treemap-site/static/css/main.029e374d.css",
-    "main.js": "/treemap-site/static/js/main.c94e05c5.js",
+    "main.js": "/treemap-site/static/js/main.b26d9723.js",
     "static/js/787.f76dc24f.chunk.js": "/treemap-site/static/js/787.f76dc24f.chunk.js",
     "index.html": "/treemap-site/index.html",
     "main.029e374d.css.map": "/treemap-site/static/css/main.029e374d.css.map",
-    "main.c94e05c5.js.map": "/treemap-site/static/js/main.c94e05c5.js.map",
+    "main.b26d9723.js.map": "/treemap-site/static/js/main.b26d9723.js.map",
     "787.f76dc24f.chunk.js.map": "/treemap-site/static/js/787.f76dc24f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.029e374d.css",
-    "static/js/main.c94e05c5.js"
+    "static/js/main.b26d9723.js"
   ]
 }
