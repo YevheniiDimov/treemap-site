@@ -11,8 +11,8 @@ function App(props) {
 
   let updateTree = () => {
     fetch('http://idmvs.ugis.org.ua/api/dboard/get/regions', {
-        headers : { 
-            'Content-Type': 'application/json',
+        method: 'POST',
+        headers : {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`
         }
@@ -25,8 +25,8 @@ function App(props) {
 
         for (let i = 0; i < temp.length; i++) {
             fetch('http://idmvs.ugis.org.ua/api/dboard/get/offices', {
-                headers : { 
-                    'Content-Type': 'application/json',
+                method: 'POST',
+                headers : {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -45,20 +45,21 @@ function App(props) {
   }
   let updateToken = () => {
     fetch('https://idmvs.ugis.org.ua/token', {
-        headers : { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
-            'scope': 'basic',
-            'grant_type': 'client_credentials',
-            'state': 'treemap1'
+        method: 'POST',
+        body: {
+          'grant_type': 'client_credentials',
+          'client_id': CLIENT_ID,
+          'client_secret': CLIENT_SECRET,
+          'scope': 'basic',
+          'state': 'treemap1'
         }
     }
     )
     .then(response => response.json())
     .then(result => {
         setToken(result.access_token);
+        console.log('Authorized result');
+        console.log(result);
         console.log('Authorized token: ' + token);
         updateTree();
     });
@@ -66,6 +67,7 @@ function App(props) {
 
   useEffect(() => {
     if (token == null) {
+      console.log('Github works');
       updateToken();
     }
   });
