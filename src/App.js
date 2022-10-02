@@ -75,7 +75,8 @@ function App() {
     let requestOptions = {
       method: 'POST',
       body: formdata,
-      redirect: 'follow'
+      redirect: 'follow',
+      mode: "cors"
     };
 
     fetch("https://idmvs.ugis.org.ua/token/", requestOptions)
@@ -95,13 +96,15 @@ function App() {
     }
   });
 
+  console.log('Update0210: 0.4.4');
+
   return (
     <div className="App">
       { tree != null ?
       <div id="treemap-box">
-        <Treemap width={window.innerWidth - 10} height={window.innerHeight - 10} data={tree}/>
+        <Treemap width={window.innerWidth - 10} height={window.innerHeight - 10} data={tree} token={token}/>
       </div>
-      : <h1>Loading...</h1>}
+      : <h1>Завантаження даних...</h1>}
     </div>
   );
 }

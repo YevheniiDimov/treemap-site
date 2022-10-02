@@ -1,7 +1,59 @@
 import * as d3 from 'd3';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
-function Treemap({ width, height, data }){
+function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", token);
+
+  var formdata = new FormData();
+
+  var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow'
+  };
+  fetch("https://idmvs.ugis.org.ua/api/dboard/get/statdeltastart", requestOptions)
+    .then(response => response.json())
+    .then(async result => {
+      if (data != null) {
+        let offices = JSON.parse(result).rows;
+        console.log('Offices: ');
+        console.log(offices);
+
+        if (!offices) {
+          throw new Error("Помилка: Дані офісів наразі недоступні. Скоріше за все жоден офіс не працює.");
+        }
+
+        for (let region of data) {
+          for (let office of region.children) {
+            let office_values = offices.find(o => o.office_id === office.id_offices);
+            if (office_values !== undefined) {
+              office.value = -office_values.avgm;
+            }
+            else {
+              console.log('Skipping missing office ' + office.offices_n);
+            }
+          }
+        }
+
+        setReceivedCallback(true);
+        console.log('Successfully retrieved office values, Data:');
+        console.log(data);
+      }
+      else {
+        throw new Error("Помилка: дані ще не отримані");
+      }
+    })
+    .catch(error => {
+      console.log('Values Error: ' + error);
+      setMessageCallback(error.message);
+    });
+}
+
+function Treemap({ width, height, data, token}){
+    const [receivedValues, setReceivedValues] = useState(false);
+    const [message, setMessage] = useState("Отримання значень...");
     const ref = useRef();
     
     const draw = () => {
@@ -41,23 +93,9 @@ function Treemap({ width, height, data }){
           .attr('y', d => d.y0)
           .attr('width', d => d.x1 - d.x0)
           .attr('height', d => d.y1 - d.y0)
-          .style("fill", d => "#30CC5A") //color(d.data.value)
+          .style("fill", d => color(d.data.value));
 
       nodes.exit().remove()
-
-      // select node titles
-      var nodeText = svg
-          .selectAll("text")
-          .data(root.leaves())
-
-      // add the text
-      nodeText.enter()
-          .append("text")
-          .attr("x", d => d.x0)
-          .attr("y", d => d.y0)
-          .text(d =>  d.data.offices_n)
-          .attr("font-size", "5px")
-          .attr("fill", "white")
       
       // select node titles
       var nodeVals = svg
@@ -67,11 +105,11 @@ function Treemap({ width, height, data }){
       // add the values
       nodeVals.enter()
           .append("text")
-          .attr("x", d => (d.x0 + d.x1)/2 - 10)
-          .attr("y", d => (d.y0 + d.y1)/2 + 10)
-          .text(d => d.data.size < 5 ? "" : d.data.id_offices)
-          .attr("font-size", "15px")
-          .attr("fill", "white")
+            .attr("x", d => (d.x0 + d.x1)/2 - 15)
+            .attr("y", d => (d.y0 + d.y1)/2 + 5)
+            .text(d => d.data.size < 5 ? "" : d.data.offices_n)
+            .attr("font-size", "12px")
+            .attr("fill", "white")
   
       // add the parent node titles
       svg
@@ -80,19 +118,31 @@ function Treemap({ width, height, data }){
       .enter()
       .append("text")
           .attr("x", d => d.x0)
-          .attr("y", d => d.y0 + 21)
+          .attr("y", d => d.y0 + 20)
           .text(d => d.data.region_name)
-          .attr("font-size", "15px");
+          .attr("font-size", "10px");
   }
 
   useEffect(() => {
-    draw();
+    if (receivedValues) {
+      draw();
+    }
   });
 
+  console.log('Retrieving values... (First)');
+  retrieveValues(data, token, setReceivedValues, setMessage);
 
-    return (
+  setInterval(() => {
+    console.log('Retrieving values...');
+    retrieveValues(data, token, setReceivedValues, setMessage);
+  }, 6E5); // Ten minutes
+
+  return (
       <div>
-        <svg ref={ref} />
+        { receivedValues 
+        ? <svg ref={ref} />
+        : <h1>{message}</h1>
+        }
       </div>
     )
 }
