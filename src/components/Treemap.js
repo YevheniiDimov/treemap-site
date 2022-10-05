@@ -1,5 +1,16 @@
 import * as d3 from 'd3';
 import React, { useRef, useEffect, useState } from 'react';
+import OfficePopup from './OfficePopup';
+
+function mouseTooltip(d, officeHandler) {
+  let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
+  let y = d3.event.pageY - document.getElementById("treemap-svg").getBoundingClientRect().y + 10;
+
+  console.log('Data click');
+  console.log(d);
+  if (!d.data.avgm) officeHandler([null, [x, y]]);
+  else officeHandler([d.data, [x, y]]);
+}
 
 function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
   var myHeaders = new Headers();
@@ -30,9 +41,12 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
             let office_values = offices.find(o => o.office_id === office.id_offices);
             if (office_values !== undefined) {
               office.value = -office_values.avgm;
+              office.cntslots = office_values.cntslots;
+              office.minm = office_values.minm;
+              office.maxm = office_values.maxm;
             }
             else {
-              console.log('Skipping missing office ' + office.offices_n);
+              //console.log('Skipping missing office ' + office.offices_n);
             }
           }
         }
@@ -51,15 +65,17 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
     });
 }
 
-function Treemap({ width, height, data, token}){
+function Treemap({ width, height, data, token}) {
     const [receivedValues, setReceivedValues] = useState(false);
     const [message, setMessage] = useState("Отримання значень...");
+    const [selectedOffice, setSelectedOffice] = useState([null, [0, 0]]); // [office, mousePosition]
     const ref = useRef();
     
     const draw = () => {
       console.log('Data');
       console.log(data);
       const svg = d3.select(ref.current);
+      svg.selectAll("*").remove();
       svg.attr('width', width).attr('height', height);
 
       let hierarchy = {'children': data};
@@ -107,8 +123,9 @@ function Treemap({ width, height, data, token}){
           .append("text")
             .attr("x", d => (d.x0 + d.x1)/2 - 15)
             .attr("y", d => (d.y0 + d.y1)/2 + 5)
-            .text(d => d.data.size < 5 ? "" : d.data.offices_n)
+            .text(d => d.data.size < 5 && d.width >= 50 ? "" : d.data.offices_n)
             .attr("font-size", "12px")
+            .attr("class", "unselectable")
             .attr("fill", "white")
   
       // add the parent node titles
@@ -120,7 +137,13 @@ function Treemap({ width, height, data, token}){
           .attr("x", d => d.x0)
           .attr("y", d => d.y0 + 20)
           .text(d => d.data.region_name)
-          .attr("font-size", "10px");
+          .attr("font-size", "12px");
+          
+      svg
+      .selectAll("*")
+        .on("click", d => mouseTooltip(d, setSelectedOffice))
+        //.on("mousemove", d => mouseTooltip(d, setSelectedOffice))
+        //.on("mouseout", () => setSelectedOffice([null, [0, 0]]));
   }
 
   useEffect(() => {
@@ -134,14 +157,24 @@ function Treemap({ width, height, data, token}){
 
   setInterval(() => {
     console.log('Retrieving values...');
+    setReceivedValues(false);
     retrieveValues(data, token, setReceivedValues, setMessage);
   }, 6E5); // Ten minutes
 
   return (
       <div>
         { receivedValues 
-        ? <svg ref={ref} />
+        ? <svg ref={ref} id={"treemap-svg"}/>
         : <h1>{message}</h1>
+        }
+        { selectedOffice[0] != null
+          ? <OfficePopup mousePosition={selectedOffice[1]} 
+                         officeNumber={selectedOffice[0].offices_n} 
+                         cntslots={selectedOffice[0].cntslots} 
+                         avgm={selectedOffice[0].value}
+                         minm={selectedOffice[0].minm}
+                         maxm={selectedOffice[0].maxm}></OfficePopup>
+          : <div>No Office</div>
         }
       </div>
     )
