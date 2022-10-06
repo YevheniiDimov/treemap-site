@@ -1,14 +1,19 @@
 import * as d3 from 'd3';
 import React, { useRef, useEffect, useState } from 'react';
 import OfficePopup from './OfficePopup';
+import { LegendThreshold } from '@vx/legend';
+
+const color = d3.scaleThreshold()
+      .domain([0, 2, 4, 6, 8])
+      .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
 
 function mouseTooltip(d, officeHandler) {
-  let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
+	let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
   let y = d3.event.pageY - document.getElementById("treemap-svg").getBoundingClientRect().y + 10;
 
   console.log('Data click');
   console.log(d);
-  if (!d.data.avgm) officeHandler([null, [x, y]]);
+  if (!d.data.value) officeHandler([null, [x, y]]);
   else officeHandler([d.data, [x, y]]);
 }
 
@@ -74,9 +79,11 @@ function Treemap({ width, height, data, token}) {
     const draw = () => {
       console.log('Data');
       console.log(data);
+
       const svg = d3.select(ref.current);
       svg.selectAll("*").remove();
-      svg.attr('width', width).attr('height', height);
+      svg
+        .attr('width', width).attr('height', height)
 
       let hierarchy = {'children': data};
       console.log('Hierarchy'); 
@@ -92,10 +99,6 @@ function Treemap({ width, height, data, token}) {
           .paddingRight(5)
           .paddingInner(2)
           (root);
-      
-      const color = d3.scaleThreshold()
-      .domain([0, 2, 4, 6, 8])
-      .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
 
       // Select the nodes
       var nodes = svg
@@ -138,12 +141,13 @@ function Treemap({ width, height, data, token}) {
           .attr("y", d => d.y0 + 20)
           .text(d => d.data.region_name)
           .attr("font-size", "12px");
-          
+      
       svg
       .selectAll("*")
-        .on("click", d => mouseTooltip(d, setSelectedOffice))
-        //.on("mousemove", d => mouseTooltip(d, setSelectedOffice))
-        //.on("mouseout", () => setSelectedOffice([null, [0, 0]]));
+        .on("click", d => mouseTooltip(d, setSelectedOffice));
+
+      d3.select("body")
+        .on("keydown", () => mouseTooltip({data: {}}, setSelectedOffice));
   }
 
   useEffect(() => {
@@ -161,10 +165,30 @@ function Treemap({ width, height, data, token}) {
     retrieveValues(data, token, setReceivedValues, setMessage);
   }, 6E5); // Ten minutes
 
+  document.getElementById("body").addEventListener("keypress", ev => {
+    if (ev.key === 'Escape') {
+      mouseTooltip(null, setSelectedOffice);
+    }
+  });
+
   return (
       <div>
         { receivedValues 
-        ? <svg ref={ref} id={"treemap-svg"}/>
+        ? <div>
+            <svg ref={ref} id={"treemap-svg"}/>
+            <LegendThreshold
+              scale={color}
+              direction="row"
+              itemDirection="column"
+              labelMargin="-20px 0 0 0"
+              labelAlign="center"
+              labelLower='Менш ніж '
+              labelUpper='Більш ніж '
+              labelDelimiter='до'
+              shapeHeight="25px"
+              shapeWidth="75px"
+            />
+            </div>
         : <h1>{message}</h1>
         }
         { selectedOffice[0] != null
@@ -174,7 +198,7 @@ function Treemap({ width, height, data, token}) {
                          avgm={selectedOffice[0].value}
                          minm={selectedOffice[0].minm}
                          maxm={selectedOffice[0].maxm}></OfficePopup>
-          : <div>No Office</div>
+          : <div></div>
         }
       </div>
     )

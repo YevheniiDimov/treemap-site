@@ -8,6 +8,7 @@ let token = null;
 
 function App() {
   const [tree, setTree] = useState(null);
+  const [screenSize, setScreenSize] = useState([window.innerWidth - 10, window.innerHeight - 35]);
 
   let updateTree = () => {
     let myHeaders = new Headers();
@@ -96,13 +97,18 @@ function App() {
     }
   });
 
-  console.log('Update0410: 0.5.1.8');
+  console.log('Update0610: 0.6.7.2');
+
+  window.addEventListener("resize", () => {
+    console.log("Screen Size change");
+    setScreenSize([window.innerWidth - 10, window.innerHeight - 35]);
+  });
 
   return (
     <div className="App">
       { tree != null ?
       <div id="treemap-box">
-        <Treemap width={window.innerWidth - 10} height={window.innerHeight - 10} data={tree} token={token}/>
+        <Treemap width={screenSize[0]} height={screenSize[1]} data={tree} token={token}/>
       </div>
       : <h1>Завантаження даних...</h1>}
     </div>
