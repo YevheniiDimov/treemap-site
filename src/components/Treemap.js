@@ -34,8 +34,8 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
     .then(async result => {
       if (data != null) {
         let offices = JSON.parse(result).rows;
-        console.log('Offices: ');
-        console.log(offices);
+        //console.log('Offices: ');
+        //console.log(offices);
 
         if (!offices) {
           throw new Error("Помилка: Дані офісів наразі недоступні. Скоріше за все жоден офіс не працює.");
@@ -45,7 +45,7 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
           for (let office of region.children) {
             let office_values = offices.find(o => o.office_id === office.id_offices);
             if (office_values !== undefined) {
-              office.value = -office_values.avgm;
+              office.value = office_values.avgm;
               office.cntslots = office_values.cntslots;
               office.minm = office_values.minm;
               office.maxm = office_values.maxm;
@@ -57,8 +57,8 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
         }
 
         setReceivedCallback(true);
-        console.log('Successfully retrieved office values, Data:');
-        console.log(data);
+        //console.log('Successfully retrieved office values, Data:');
+        //console.log(data);
       }
       else {
         throw new Error("Помилка: дані ще не отримані");
@@ -70,15 +70,15 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
     });
 }
 
-function Treemap({ width, height, data, token}) {
+function Treemap({ width, height, data, token, selectedOption}) {
     const [receivedValues, setReceivedValues] = useState(false);
     const [message, setMessage] = useState("Отримання значень...");
     const [selectedOffice, setSelectedOffice] = useState([null, [0, 0]]); // [office, mousePosition]
     const ref = useRef();
     
     const draw = () => {
-      console.log('Data');
-      console.log(data);
+      //console.log('Data');
+      //console.log(data);
 
       const svg = d3.select(ref.current);
       svg.selectAll("*").remove();
@@ -86,8 +86,8 @@ function Treemap({ width, height, data, token}) {
         .attr('width', width).attr('height', height)
 
       let hierarchy = {'children': data};
-      console.log('Hierarchy'); 
-      console.log(hierarchy);
+      //console.log('Hierarchy'); 
+      //console.log(hierarchy);
 
       // Give the data to this cluster layout:
       var root = d3.hierarchy(hierarchy).sum(d => d.size);
@@ -112,7 +112,17 @@ function Treemap({ width, height, data, token}) {
           .attr('y', d => d.y0)
           .attr('width', d => d.x1 - d.x0)
           .attr('height', d => d.y1 - d.y0)
-          .style("fill", d => color(d.data.value));
+          .style("fill", d => {
+            if (selectedOption === "avgm") {
+              //console.log("Selected avgm option");
+              //console.log(d.data.value);
+              return color(d.data.value);
+            }
+
+            //console.log(`Selected ${selectedOption} option`);
+            //console.log(d.data[selectedOption]);
+            return color(d.data[selectedOption]);
+          });
 
       nodes.exit().remove()
       
@@ -126,7 +136,7 @@ function Treemap({ width, height, data, token}) {
           .append("text")
             .attr("x", d => (d.x0 + d.x1)/2 - 15)
             .attr("y", d => (d.y0 + d.y1)/2 + 5)
-            .text(d => d.data.size < 5 && d.width >= 50 ? "" : d.data.offices_n)
+            .text(d => d.data.size < 5 ? "" : d.data.offices_n)
             .attr("font-size", "12px")
             .attr("class", "unselectable")
             .attr("fill", "white")
@@ -193,11 +203,9 @@ function Treemap({ width, height, data, token}) {
         }
         { selectedOffice[0] != null
           ? <OfficePopup mousePosition={selectedOffice[1]} 
-                         officeNumber={selectedOffice[0].offices_n} 
-                         cntslots={selectedOffice[0].cntslots} 
-                         avgm={selectedOffice[0].value}
-                         minm={selectedOffice[0].minm}
-                         maxm={selectedOffice[0].maxm}></OfficePopup>
+                         office_data={selectedOffice[0]}
+                         token={token}
+                         setMessageCallback={setMessage}></OfficePopup>
           : <div></div>
         }
       </div>
