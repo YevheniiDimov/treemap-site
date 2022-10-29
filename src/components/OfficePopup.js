@@ -9,15 +9,15 @@ const Popup = styled.div`
     background-color: white;
     left: ${props => props.mousePosition[0]}px;
     top: ${props => props.mousePosition[1]}px;
-    text-align: left;
+    font-size: 14px;
 `;
 
-function retrieveValues(office_data, token, setReceivedCallback, setMessageCallback) {
+function retrieveValues(data, token, setReceivedCallback, setDataCallback, setMessageCallback) {
     let myHeaders = new Headers();
     myHeaders.append("Authorization", token);
 
     let formdata = new FormData();
-    formdata.append("office_id", office_data.id_offices);
+    formdata.append("office_id", data.id_offices);
 
     let requestOptions = {
             method: 'POST',
@@ -40,12 +40,13 @@ function retrieveValues(office_data, token, setReceivedCallback, setMessageCallb
             }
 
             for (let attrname in values) {
-                office_data[attrname] = values[attrname];
+                data[attrname] = values[attrname];
             }
 
             console.log("Values +");
             console.log(values);
 
+            setDataCallback(data);
             setReceivedCallback(true);
         })
         .catch(error => {
@@ -56,33 +57,46 @@ function retrieveValues(office_data, token, setReceivedCallback, setMessageCallb
 
 function OfficePopup({ mousePosition, office_data, token, setMessageCallback}) {
     const [position, setPosition] = useState(mousePosition);
+    const [data, setData] = useState(office_data);
     const [receivedValues, setReceivedValues] = useState(false);
     const popupRef = useRef();
     
     useEffect(() => {
         if (popupRef.current) {
-            if (mousePosition[0] > window.innerWidth/2) {
-                setPosition([mousePosition[0] - popupRef.current.offsetWidth, mousePosition[1]]);
+            let mouseX = mousePosition[0];
+            let mouseY = mousePosition[1];
+
+            if (mouseX > window.innerWidth/2) {
+                mouseX -= popupRef.current.offsetWidth;
                 console.log("Right");
             }
             else {
-                setPosition(mousePosition);
                 console.log("Left");
             }
 
+            if (mouseY > window.innerHeight/2) {
+                mouseY -= popupRef.current.offsetHeight;
+                console.log("Bottom");
+            }
+            else {
+                console.log("Top");
+            }
+
+            setPosition([mouseX, mouseY]);
+
             if (!receivedValues) {
-                retrieveValues(office_data, token, setReceivedValues, setMessageCallback);
+                retrieveValues(office_data, token, setReceivedValues, setData, setMessageCallback);
             }
         }
-    }, [mousePosition]);
+    }, [mousePosition, data]);
 
-    retrieveValues(office_data, token, setReceivedValues, setMessageCallback);
+    retrieveValues(office_data, token, setReceivedValues, setData, setMessageCallback);
 
     return (
         <div>
-            { receivedValues && office_data.cnt ?
-            <Popup mousePosition={position} ref={popupRef} class="d-flex flex-wrap justify-content-between align-items-center" id="popup">
-                <table class="table-sm">
+            { receivedValues && data.cnt ?
+            <Popup mousePosition={position} ref={popupRef} className="d-flex flex-wrap justify-content-between align-items-center" id="popup">
+                <table className="table-sm">
                     <thead>
                         <tr>
                             <th scope="col">ТСЦ №</th>
@@ -90,28 +104,33 @@ function OfficePopup({ mousePosition, office_data, token, setMessageCallback}) {
                             <th scope="col">Точність (хв.)</th>
                             <th scope="col">Min (хв.)</th>
                             <th scope="col">Max (хв.)</th>
-                            <th scope="col">Cnt</th>
-                            <th scope="col">Freetoprocessing</th>
-                            <th scope="col">Reserve</th>
-                            <th scope="col">Hardreserve</th>
-                            <th scope="col">Waiting</th>
-                            <th scope="col">Processing</th>
-                            <th scope="col">Processed</th>
+                            <th scope="col">Талонів</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="text-center">{office_data.officeNumber}</td>
-                            <td class="text-center">{office_data.cntslots}</td>
-                            <td class="text-center">{office_data.avgm}</td>
-                            <td class="text-center">{office_data.minm}</td>
-                            <td class="text-center">{office_data.maxm}</td>
-                            <td class="text-center">{office_data.cnt}</td>
-                            <td class="text-center">{office_data.freetoprocessing}</td>
-                            <td class="text-center">{office_data.reserve}</td>
-                            <td class="text-center">{office_data.hardreserve}</td>
-                            <td class="text-center">{office_data.processing}</td>
-                            <td class="text-center">{office_data.processed}</td>
+                        <tr className="text-center">
+                            <td>{data.offices_n}</td>
+                            <td>{data.cntslots}</td>
+                            <td>{data.value}</td>
+                            <td>{data.minm}</td>
+                            <td>{data.maxm}</td>
+                            <td>{data.cnt}</td>
+                        </tr>
+                        <tr className="text-center">
+                            <th scope="col">Вільні</th>
+                            <th scope="col">Резерв</th>
+                            <th scope="col">Жорсткий резерв</th>
+                            <th scope="col">Зареєстровано</th>
+                            <th scope="col">Йде прийом</th>
+                            <th scope="col">Завершено</th>
+                        </tr>
+                        <tr className="text-center">
+                            <td>{data.freetoprocessing}</td>
+                            <td>{data.reserve}</td>
+                            <td>{data.hardreserve}</td>
+                            <td>{data.waiting}</td>
+                            <td>{data.processing}</td>
+                            <td>{data.processed}</td>
                         </tr>
                     </tbody>
                 </table>

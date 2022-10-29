@@ -1,17 +1,24 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import Treemap from './components/Treemap';
+import ServicesDataController from './components/ServicesDataController'
+import TreemapDataController from './components/TreemapDataController';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink
+} from "react-router-dom";
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 const options = ["avgm", "minm", "maxm", "cntslots"]
 let token = null;
 
-
 function App() {
   const [tree, setTree] = useState(null);
-  const [screenSize, setScreenSize] = useState([window.innerWidth - 5, window.innerHeight - 75]);
+  const [screenSize, setScreenSize] = useState([window.innerWidth - 5, window.innerHeight - 130]);
   const [selectedOption, setSelectedOption] = useState("avgm");
+  const [selectedOffice, setSelectedOffice] = useState(null);
 
   let updateTree = () => {
     let myHeaders = new Headers();
@@ -87,9 +94,6 @@ function App() {
     .then(response => response.json())
     .then(result => {
         token = `${result.token_type} ${result.access_token}`;
-        //console.log('Authorized result');
-        //console.log(result);
-        //console.log('Authorized token: ' + token);
         updateTree();
     });
   }
@@ -98,27 +102,36 @@ function App() {
     if (token == null) {
       updateToken();
     }
-  });
+  }, [selectedOffice]);
 
-  console.log('Update2010: 0.8.5.6');
+  console.log('Update2910: 0.8.7.5');
 
   window.addEventListener("resize", () => {
     //console.log("Screen Size change");
-    setScreenSize([window.innerWidth - 10, window.innerHeight - 75]);
+    setScreenSize([window.innerWidth - 10, window.innerHeight - 130]);
   });
 
   return (
     <div className="App">
-      { tree != null ?
-      <div id="treemap-box">
-        <Treemap width={screenSize[0]} height={screenSize[1]} data={tree} token={token} selectedOption={selectedOption} />
-        <select className="form-select my-2" value={selectedOption} onChange={e => setSelectedOption(e.target.value)}>
-          {options.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      </div>
-      : <h1>Завантаження даних...</h1>}
+      <Router>
+        <nav className="navbar navbar-light bg-light">
+          <div className='container col-4'>
+            <NavLink className={({ isActive }) => 
+              (isActive ? "nav-link fw-bold" : "nav-link")} to="/">Діаграма</NavLink>
+            {selectedOffice ?
+            <NavLink className={({ isActive }) => 
+              (isActive ? "nav-link fw-bold" : "nav-link")} to="/services">Сервіси офіса {selectedOffice.offices_name}</NavLink>
+            : ''}
+          </div>
+        </nav>
+        <Routes>
+          <Route path="/" element={<TreemapDataController tree={tree} screenSize={screenSize} options={options} 
+            selectedOption={selectedOption} token={token} setSelectedOptionHandler={setSelectedOption} 
+            setSelectedOfficeHandler={setSelectedOffice}
+            />} />
+          <Route path="/services" element={<ServicesDataController office_data={selectedOffice} token={token} />} />
+        </Routes>
+      </Router>
     </div>
   );
 }

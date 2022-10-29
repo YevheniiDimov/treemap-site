@@ -7,14 +7,20 @@ const color = d3.scaleThreshold()
       .domain([0, 2, 4, 6, 8])
       .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
 
-function mouseTooltip(d, officeHandler) {
+function mouseTooltip(d, officeHandler, setSelectedOfficeHandler) {
 	let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
   let y = d3.event.pageY - document.getElementById("treemap-svg").getBoundingClientRect().y + 10;
 
   console.log('Data click');
   console.log(d);
-  if (!d.data.value) officeHandler([null, [x, y]]);
-  else officeHandler([d.data, [x, y]]);
+  if (!d.data.value) {
+    officeHandler([null, [x, y]]);
+    setSelectedOfficeHandler(null);
+  }
+  else {
+    officeHandler([d.data, [x, y]]);
+    setSelectedOfficeHandler(d.data);
+  }
 }
 
 function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
@@ -70,7 +76,7 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
     });
 }
 
-function Treemap({ width, height, data, token, selectedOption}) {
+function Treemap({ width, height, data, token, selectedOption, setSelectedOfficeHandler}) {
     const [receivedValues, setReceivedValues] = useState(false);
     const [message, setMessage] = useState("Отримання значень...");
     const [selectedOffice, setSelectedOffice] = useState([null, [0, 0]]); // [office, mousePosition]
@@ -95,8 +101,9 @@ function Treemap({ width, height, data, token, selectedOption}) {
       // initialize treemap
       d3.treemap()
           .size([width, height])
-          .paddingTop(28)
-          .paddingRight(5)
+          .paddingTop(24)
+          .paddingLeft(1)
+          .paddingRight(1)
           .paddingInner(2)
           (root);
 
@@ -150,14 +157,15 @@ function Treemap({ width, height, data, token, selectedOption}) {
           .attr("x", d => d.x0)
           .attr("y", d => d.y0 + 20)
           .text(d => d.data.region_name)
-          .attr("font-size", "12px");
+          .attr("font-size", "12px")
+          .attr();
       
       svg
       .selectAll("*")
-        .on("click", d => mouseTooltip(d, setSelectedOffice));
+        .on("click", d => mouseTooltip(d, setSelectedOffice, setSelectedOfficeHandler));
 
       d3.select("body")
-        .on("keydown", () => mouseTooltip({data: {}}, setSelectedOffice));
+        .on("keydown", () => mouseTooltip({data: {}}, setSelectedOffice, setSelectedOfficeHandler));
   }
 
   useEffect(() => {
@@ -177,7 +185,7 @@ function Treemap({ width, height, data, token, selectedOption}) {
 
   document.getElementById("body").addEventListener("keypress", ev => {
     if (ev.key === 'Escape') {
-      mouseTooltip(null, setSelectedOffice);
+      mouseTooltip(null, setSelectedOffice, setSelectedOfficeHandler);
     }
   });
 
