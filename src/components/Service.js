@@ -14,9 +14,9 @@ function Service({office, services}) {
             <table className="table table-hover">
                 <thead>
                     <tr>
-                        <th>№</th>
-                        <th>Кількість</th>
-                        <th>Назва</th>
+                        <th>ID</th>
+                        <th>Назва послуги</th>
+                        <th>Надано</th>
                         <th>Використання робочого часу</th>
                     </tr>
                 </thead>
@@ -24,14 +24,14 @@ function Service({office, services}) {
                     {services.map(service => (
                         <tr key={service.id_q}>
                             <td>{service.id_q}</td>
-                            <td>{service.cnt}</td>
                             <td>{service.qname}</td>
-                            <td>{service.kavg}</td>
+                            <td>{service.cnt}</td>
+                            <td>{Math.round(service.kavg) + '%'}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <table className="table table-sm table-bordered table-hover mt-5">
+            <table className="table table-sm table-bordered mt-5">
                 <thead>
                     <tr>
                         <th>Використання робочого часу</th>
@@ -43,9 +43,9 @@ function Service({office, services}) {
                 <tbody>
                     <tr>
                         <td></td>
-                        <td>{avg}</td>
-                        <td>{min}</td>
-                        <td>{max}</td>
+                        <td>{Math.round(avg * 100) / 100 + '%'}</td>
+                        <td>{Math.round(min) + '%'}</td>
+                        <td>{Math.round(max) + '%'}</td>
                     </tr>
                 </tbody>
             </table>

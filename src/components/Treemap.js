@@ -4,8 +4,12 @@ import OfficePopup from './OfficePopup';
 import { LegendThreshold } from '@vx/legend';
 
 const color = d3.scaleThreshold()
-      .domain([0, 2, 4, 6, 8])
-      .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
+    .domain([0, 2, 4, 6, 8])
+    .range(["#30CC5A", "#2F9E4F", "#35764E", "#8B444E", "#BF4045", "#F63538"]);
+
+const colorHundred = d3.scaleThreshold()
+    .domain([95, 100])
+    .range(["#FFFF00", "#30CC5A", "#F63538"]);
 
 function mouseTooltip(d, officeHandler, setSelectedOfficeHandler) {
 	let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
@@ -63,8 +67,8 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
         }
 
         setReceivedCallback(true);
-        //console.log('Successfully retrieved office values, Data:');
-        //console.log(data);
+        console.log('Successfully retrieved office values, Data:');
+        console.log(data);
       }
       else {
         throw new Error("Помилка: дані ще не отримані");
@@ -120,15 +124,15 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
           .attr('width', d => d.x1 - d.x0)
           .attr('height', d => d.y1 - d.y0)
           .style("fill", d => {
-            if (selectedOption === "avgm") {
+            if (selectedOption === "accuracy") {
               //console.log("Selected avgm option");
               //console.log(d.data.value);
               return color(d.data.value);
             }
 
-            //console.log(`Selected ${selectedOption} option`);
-            //console.log(d.data[selectedOption]);
-            return color(d.data[selectedOption]);
+            console.log(`Selected ${selectedOption} option`);
+            console.log(d.data);
+            return colorHundred(d.data[selectedOption]);
           });
 
       nodes.exit().remove()

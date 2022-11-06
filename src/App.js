@@ -11,67 +11,110 @@ import {
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
-const options = ["avgm", "minm", "maxm", "cntslots"]
 let token = null;
 
 function App() {
   const [tree, setTree] = useState(null);
   const [screenSize, setScreenSize] = useState([window.innerWidth - 5, window.innerHeight - 130]);
-  const [selectedOption, setSelectedOption] = useState("avgm");
+  const [selectedOption, setSelectedOption] = useState("accuracy");
+  const [options, setOptions] = useState([]);
   const [selectedOffice, setSelectedOffice] = useState(null);
 
-  let updateTree = () => {
-    let myHeaders = new Headers();
-    myHeaders.append("Authorization", token);
+  let updateTree = option => {
+      let myHeaders = new Headers();
+      myHeaders.append("Authorization", token);
 
-    let formdata = new FormData();
+      let formdata = new FormData();
 
-    let requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: formdata,
-      redirect: 'follow'
-    };
+      let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow'
+      };
 
-    fetch("https://idmvs.ugis.org.ua/api/dboard/get/regions", requestOptions)
-    .then(response => response.json())
-    .then(async result => {
-        let temp = JSON.parse(result).rows.filter(region => region.id_region !== 24);
-        let offices_promises = [];
+      fetch("https://idmvs.ugis.org.ua/api/dboard/get/regions", requestOptions)
+      .then(response => response.json())
+      .then(async result => {
+      let temp = JSON.parse(result).rows.filter(region => region.id_region !== 24);
+      let offices_promises = [];
 
-        for (let i = 0; i < temp.length; i++) {
-          let myHeaders = new Headers();
-          myHeaders.append("Authorization", token);
+      for (let i = 0; i < temp.length; i++) {
+        let myHeaders = new Headers();
+        myHeaders.append("Authorization", token);
 
-          let formdata = new FormData();
-          formdata.append("id_region", temp[i].id_region);
+        let formdata = new FormData();
+        formdata.append("id_region", temp[i].id_region);
 
-          let requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: formdata,
-            redirect: 'follow'
-          };
+        let requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: formdata,
+          redirect: 'follow'
+        };
 
-          let p = new Promise(async (resolve, reject) => {
+        let p = 'p_default';
+
+        if (option === 'accuracy') {
+          p = new Promise(async (resolve, reject) => {
             await fetch("https://idmvs.ugis.org.ua/api/dboard/get/offices", requestOptions)
             .then(response => response.json())
-            .then(offices => {
+            .then(async offices => {
               temp[i].children = JSON.parse(offices).rows;
-              resolve(0);
-            })
-            .catch(error => reject(error));
-          });
+              await fetch("https://idmvs.ugis.org.ua/api/dboard/get/worktime", requestOptions)
+              .then(response => response.json())
+              .then(async result => {
+                let times = JSON.parse(result).rows;
+                let worktimes = {};
 
-          offices_promises.push(p);
+                for (let time of times) {
+                  if (worktimes[time.office_id] !== undefined) {
+                    worktimes[time.office_id].avg.push(parseFloat(time.kavg));
+                    worktimes[time.office_id].services.push({'name': time.qname, 'avg': time.kavg});
+                  } else {
+                    worktimes[time.office_id] = {'avg': [], 'services': []};
+                  }
+                }
+
+                let uniqueServiceNames = [];
+
+                for (let j = 0; j < temp[i].children.length; j++) {
+                  let total = 0;
+                  let worktime = worktimes[temp[i].children[j].id_offices];
+                  if (worktime) {
+                    for (let k = 0; k < worktime.length; k++) {
+                      total += worktime.avg[k];
+                    }
+
+                    let avg = total / worktime.avg.length;
+
+                    for (let service of worktime.services) {
+                      if (!uniqueServiceNames.includes(service.name)) {
+                        uniqueServiceNames.push(service.name);
+                        temp[i].children[j][service.name] = service.avg;
+                      }
+                    }
+                
+                    temp[i].children[j].worktime = avg;
+
+                    setOptions(uniqueServiceNames);
+                  }
+                }
+              }).catch(error => reject(error));
+            }).catch(error => reject(error));
+            resolve(0);
+            return temp;
+          });
         }
 
-        Promise.all(offices_promises).then(values => {
-          console.log('Values: ' + JSON.stringify(values));
-          console.log(JSON.stringify(temp));
-          setTree(temp.filter(r => r.children));
-          //console.log('Received tree: ' + tree);
-        })
+        offices_promises.push(p);
+      }
+
+      Promise.all(offices_promises).then(values => {
+        //console.log('Values (With Worktime): ' + JSON.stringify(values));
+        //console.log(JSON.stringify(temp));
+        setTree(temp.filter(r => r.children));
+      });
     });
   }
   
@@ -94,7 +137,7 @@ function App() {
     .then(response => response.json())
     .then(result => {
         token = `${result.token_type} ${result.access_token}`;
-        updateTree();
+        updateTree(selectedOption);
     });
   }
 
@@ -104,12 +147,10 @@ function App() {
     }
   }, [selectedOffice]);
 
-  console.log('Update2910: 0.8.7.5');
+  console.log('Update0611: 0.9');
 
-  window.addEventListener("resize", () => {
-    //console.log("Screen Size change");
-    setScreenSize([window.innerWidth - 10, window.innerHeight - 130]);
-  });
+  window.addEventListener("resize", () => 
+    setScreenSize([window.innerWidth - 10, window.innerHeight - 130]));
 
   return (
     <div className="App">
@@ -125,7 +166,7 @@ function App() {
           </div>
         </nav>
         <Routes>
-          <Route path="/" element={<TreemapDataController tree={tree} screenSize={screenSize} options={options} 
+          <Route path="/" element={<TreemapDataController tree={tree} screenSize={screenSize} options={options}
             selectedOption={selectedOption} token={token} setSelectedOptionHandler={setSelectedOption} 
             setSelectedOfficeHandler={setSelectedOffice}
             />} />
