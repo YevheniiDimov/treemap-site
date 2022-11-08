@@ -31,3 +31,53 @@ text {
 .vx-legend {
   justify-content: center;
 }
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+  text-indent: 30%;
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+
+}
+/* Стили для номеров снрвисных центров*/
+.node {
+  font-size: calc(0.6vw + 0.3vh + 0.1vmin);
+
+}
+/* Стили для названий областей*/
+.titles {
+  font-size: calc(0.7vw + 0.2vh + 0.3vmin);
+  fill: white;
+  font-family:Arial;
+
+}
+/* Пименение градиента к фону Областей*/
+.rectangle{
+  fill: url(#MyGradient);
+}
+
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

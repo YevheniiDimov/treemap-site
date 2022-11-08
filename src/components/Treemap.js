@@ -9,7 +9,7 @@ const color = d3.scaleThreshold()
 
 const colorHundred = d3.scaleThreshold()
     .domain([95, 100])
-    .range(["#FFFF00", "#30CC5A", "#F63538"]);
+    .range(["#046381", "#30CC5A", "#F63538"]);
 
 function mouseTooltip(d, officeHandler, setSelectedOfficeHandler) {
 	let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
@@ -125,14 +125,26 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
           .attr('height', d => d.y1 - d.y0)
           .style("fill", d => {
             if (selectedOption === "accuracy") {
-              //console.log("Selected avgm option");
-              //console.log(d.data.value);
               return color(d.data.value);
             }
 
             console.log(`Selected ${selectedOption} option`);
             console.log(d.data);
             return colorHundred(d.data[selectedOption]);
+          })
+          .on("mouseover", () => {
+            d3.select(this)
+                .transition()
+                .duration(100)
+                .style("stroke", "yellow")
+                .style("stroke-width", "2")
+          })
+          .on("mouseout", () => {
+              d3.select(this)
+                  .transition()
+                  .style("fill", d => color(d.data.value))
+                  .style("stroke", "#323232")
+                  .style("stroke-width", "0")
           });
 
       nodes.exit().remove()
@@ -142,15 +154,74 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
           .selectAll("vals")
           .data(root.leaves())  
 
+      nodeVals.enter()
+          .append("text")
+            .attr("x", d => (d.x0 + d.x1)/2 - 13)
+            .attr("y", d => (d.y0 + d.y1)/2 + 5)
+            .text(d => d.data.size < 2 ? "" : d.data.id)//
+            .attr("class", "node")
+
+            svg
+            .selectAll("titles")
+            .data(root.descendants().filter(d => d.depth === 1))
+            .enter()
+            .append("rect")
+            .attr("class", "rectangle titles")
+            .attr("x", d => d.x0)
+            .attr("y", d => d.y0+5)
+            .attr('width', d => d.x1 - d.x0-10)
+            .attr("height", 20)
+            .on("mouseover", () => {
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .style("stroke", "yellow")
+                    .style("stroke-width", "2")
+  
+            })
+            .on("mouseout", () => {
+                d3.select(this)
+                    .transition()
+                    .style("fill", d => color(d.data.value))
+                    .style("stroke", "#323232")
+                    .style("stroke-width", "0")
+            });
+
       // add the values
       nodeVals.enter()
           .append("text")
-            .attr("x", d => (d.x0 + d.x1)/2 - 15)
+            .attr("x", d => (d.x0 + d.x1)/2 - 13)
             .attr("y", d => (d.y0 + d.y1)/2 + 5)
             .text(d => d.data.size < 5 ? "" : d.data.offices_n)
             .attr("font-size", "12px")
             .attr("class", "unselectable")
             .attr("fill", "white")
+
+      svg
+        .selectAll("titles")
+        .data(root.descendants().filter(d => d.depth === 1))
+        .enter()
+        .append("rect")
+        .attr("class", "rectangle")
+        .attr("x", d => d.x0 + 4)
+        .attr("y", d => d.y0 + 5)
+        .attr('width', d => d.x1 - d.x0 - 4)
+        .attr("height", 20)
+        .on("mouseover", () => {
+            d3.select(this)
+                .transition()
+                .duration(100)
+                .style("stroke", "yellow")
+                .style("stroke-width", "2")
+
+        })
+        .on("mouseout", () => {
+            d3.select(this)
+                .transition()
+                .style("fill", d => color(d.data.value))
+                .style("stroke", "#323232")
+                .style("stroke-width", "0")
+        });
   
       // add the parent node titles
       svg
@@ -158,10 +229,11 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
       .data(root.descendants().filter(d => d.depth === 1))
       .enter()
       .append("text")
-          .attr("x", d => d.x0)
-          .attr("y", d => d.y0 + 20)
+          .attr("x", d => (d.x0 + d.x1)/2 - 45)
+          .attr("y", d => d.y0 + 21)
           .text(d => d.data.region_name)
           .attr("font-size", "12px")
+          .attr("fill", "#fff")
           .attr();
       
       svg
