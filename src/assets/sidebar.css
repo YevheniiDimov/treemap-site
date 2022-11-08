@@ -1,0 +1,95 @@
+body {
+ background-color: rgba(51, 51, 51);
+}
+.sidebar {
+    height: 100%;
+    width: 3em;
+    position: fixed !important;
+    z-index: 1;
+    top: 0;
+    left: 0;
+   
+    overflow-x: hidden;
+    transition: 0.1s;
+    padding-top: 60px;
+    background: rgba(51, 51, 51);
+  }
+  .active{
+    width: 15em;
+    
+  }
+  
+  .sidebar a  {
+    width: 1em;
+    height: 1em;
+    
+   
+    text-decoration: none;
+    font-size: 1em;
+    color: #818181;
+    display: block;
+    transition: 0.5s;
+    text-align: center;
+  }
+ #Buttons{
+  transition: 0.5s;
+  width: 100%;
+  position: absolute;
+    display :none;
+    top: 15%;
+    left: 15%;
+  }
+  #Buttons button{
+    margin-top: 5%;
+    transition: 0.5s;
+    width: 70%;
+    
+    font-size: 1em;
+    
+    color: #818181;
+    display: block;
+    transition: 0.5s;
+    text-align: center;
+  }
+  
+  .sidebar a:hover {
+    color: #f1f1f1;
+  }
+
+  
+  .sidebar .closebtn {
+    position: absolute;
+    top: 0.5em;
+    right:0em;
+    width: 3em;
+    height: 3em;
+    font-size: 1em;
+    padding: 0;
+  }
+  
+  
+  .mainactive{
+    margin-left:12em;
+    
+  }
+  .buttonsactive{
+    display: block;
+    transition: 0.5s;
+  }
+  
+  #main {
+    display: flex;
+    top: 1em;
+    left: 3em;
+  position: absolute;
+    transition: 0.1s;
+    padding: 0 0 0 0px;
+    
+  }
+  
+  
+  /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+  @media screen and (max-height: 450px) {
+    .sidebar {padding-top: 15px;}
+    .sidebar a {font-size: 18px;}
+  }

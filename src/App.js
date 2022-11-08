@@ -1,7 +1,10 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import './App.css';
 import { useEffect, useState } from 'react';
 import ServicesDataController from './components/ServicesDataController'
 import TreemapDataController from './components/TreemapDataController';
+import MenuImg from "./assets/menu-24px.svg"
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,9 +16,22 @@ const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 let token = null;
 
+let closeNav = () => {
+  let side = document.getElementById("mySidebar");
+  side.classList.toggle("active");
+  let maindiv = document.getElementById("main");
+  maindiv.classList.toggle("mainactive");
+  let buttonsdiv =document.getElementById("Buttons");
+  if (buttonsdiv.style.display === 'block') {
+    buttonsdiv.style.display = 'none';
+  } else {
+    buttonsdiv.style.display = 'block';
+  }
+ }
+
 function App() {
   const [tree, setTree] = useState(null);
-  const [screenSize, setScreenSize] = useState([window.innerWidth - 5, window.innerHeight - 130]);
+  const [screenSize, setScreenSize] = useState([window.innerWidth - 53, window.innerHeight - 100]);
   const [selectedOption, setSelectedOption] = useState("accuracy");
   const [options, setOptions] = useState([]);
   const [selectedOffice, setSelectedOffice] = useState(null);
@@ -150,28 +166,42 @@ function App() {
   console.log('Update0611: 0.9');
 
   window.addEventListener("resize", () => 
-    setScreenSize([window.innerWidth - 10, window.innerHeight - 130]));
+    setScreenSize([window.innerWidth - 53, window.innerHeight - 130]));
 
   return (
-    <div className="App">
+    <div className="App text-bg-dark">
       <Router>
-        <nav className="navbar navbar-light bg-light">
-          <div className='container col-4'>
-            <NavLink className={({ isActive }) => 
-              (isActive ? "nav-link fw-bold" : "nav-link")} to="/">Діаграма</NavLink>
+      <div>
+        <div id="mySidebar" className="sidebar">
+          <a className="closebtn" onClick={closeNav}><img src={MenuImg}></img></a>
+          <div id='Buttons'>
+            
+          <button className="btn btn-dark dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false">Категорії</button>
+          <ul className="collapse" id="collapseExample">
+            <li><NavLink className={({ isActive }) => 
+              (isActive ? "nav-link dropdown-item fw-bold" : "nav-link dropdown-item")} to="/">Діаграма</NavLink></li>
             {selectedOffice ?
-            <NavLink className={({ isActive }) => 
-              (isActive ? "nav-link fw-bold" : "nav-link")} to="/services">Сервіси офіса {selectedOffice.offices_name}</NavLink>
+            <li><NavLink className={({ isActive }) => 
+              (isActive ? "nav-link dropdown-item fw-bold" : "nav-link dropdown-item")} to="/services">Офіс {selectedOffice.offices_n}</NavLink></li>
             : ''}
+          </ul>
+          
+          <button className="btn btn-dark" href="#">Легенда</button>
+          <button className="btn btn-dark" href="#">Гістограма</button>
+          <button className="btn btn-dark" href="#">Карта центрів</button>
           </div>
-        </nav>
-        <Routes>
-          <Route path="/" element={<TreemapDataController tree={tree} screenSize={screenSize} options={options}
-            selectedOption={selectedOption} token={token} setSelectedOptionHandler={setSelectedOption} 
-            setSelectedOfficeHandler={setSelectedOffice}
-            />} />
-          <Route path="/services" element={<ServicesDataController office_data={selectedOffice} token={token} />} />
-        </Routes>
+        </div>
+
+          <div id="main" className="text-bg-dark">
+            <Routes>
+              <Route path="/" element={<TreemapDataController tree={tree} screenSize={screenSize} options={options}
+                selectedOption={selectedOption} token={token} setSelectedOptionHandler={setSelectedOption} 
+                setSelectedOfficeHandler={setSelectedOffice}
+                />} />
+              <Route path="/services" element={<ServicesDataController office_data={selectedOffice} token={token} />} />
+            </Routes>
+          </div>
+        </div>
       </Router>
     </div>
   );

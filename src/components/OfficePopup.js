@@ -10,6 +10,8 @@ const Popup = styled.div`
     left: ${props => props.mousePosition[0]}px;
     top: ${props => props.mousePosition[1]}px;
     font-size: 14px;
+    color: black;
+    z-index: 1;
 `;
 
 function retrieveValues(data, token, setReceivedCallback, setDataCallback, setMessageCallback) {

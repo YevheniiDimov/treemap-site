@@ -9,9 +9,9 @@ function Service({office, services}) {
     console.log(services.map(s => s.kavg));
 
     return (
-        <div className="container">
-            <h2>{office.offices_name}</h2>
-            <table className="table table-hover">
+        <div className="container-fluid col-10">
+            <h2 className="text-white">{office.offices_name}</h2>
+            <table className="table text-white">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -31,7 +31,7 @@ function Service({office, services}) {
                     ))}
                 </tbody>
             </table>
-            <table className="table table-sm table-bordered mt-5">
+            <table className="table table-sm table-bordered mt-5 text-white">
                 <thead>
                     <tr>
                         <th>Використання робочого часу</th>

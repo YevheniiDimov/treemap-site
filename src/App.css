@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  min-height: 100vh;
 }
 
 * {
@@ -80,4 +81,8 @@ text {
   to {
     transform: rotate(360deg);
   }
+}
+
+#treemap-svg {
+  margin-left: 2px;
 }
