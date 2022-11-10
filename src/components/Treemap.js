@@ -9,7 +9,7 @@ const color = d3.scaleThreshold()
 
 const colorHundred = d3.scaleThreshold()
     .domain([95, 100])
-    .range(["#FFFF00", "#30CC5A", "#F63538"]);
+    .range(["#046381", "#30CC5A", "#F63538"]);
 
 function mouseTooltip(d, officeHandler, setSelectedOfficeHandler) {
 	let x = d3.event.pageX - document.getElementById("treemap-svg").getBoundingClientRect().x + 10;
