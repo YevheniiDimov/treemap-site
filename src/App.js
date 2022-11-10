@@ -110,11 +110,7 @@ function App() {
         offices_promises.push(p);
       }
 
-      Promise.all(offices_promises).then(values => {
-        //console.log('Values (With Worktime): ' + JSON.stringify(values));
-        //console.log(JSON.stringify(temp));
-        setTree(temp.filter(r => r.children));
-      });
+      Promise.all(offices_promises).then(() => setTree(temp.filter(r => r.children)));
     });
   }
   

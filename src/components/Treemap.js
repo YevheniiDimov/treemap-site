@@ -78,7 +78,7 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
 function Treemap({ width, height, data, token, selectedOption, setSelectedOfficeHandler}) {
     const [receivedValues, setReceivedValues] = useState(false);
     const [message, setMessage] = useState("Отримання значень...");
-    const [selectedOffice, setSelectedOffice] = useState([null, [0, 0]]); // [office, mousePosition]
+    const [selectedOffice, setSelectedOffice] = useState([null, [0, 0]]);
     const ref = useRef();
     
     const draw = () => {
@@ -115,8 +115,6 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
           .attr('height', d => d.y1 - d.y0)
           .style("fill", d => {
             if (selectedOption === "accuracy") {
-              //console.log("Selected avgm option");
-              //console.log(d.data.value);
               return color(d.data.value);
             }
 
@@ -199,7 +197,7 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
               labelUpper='Більш ніж '
               labelDelimiter='до'
               shapeHeight="25px"
-              shapeWidth="75px"
+              shapeWidth="100px"
             />
             :
             <LegendThreshold
