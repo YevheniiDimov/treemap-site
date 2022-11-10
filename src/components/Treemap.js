@@ -44,8 +44,6 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
     .then(async result => {
       if (data != null) {
         let offices = JSON.parse(result).rows;
-        //console.log('Offices: ');
-        //console.log(offices);
 
         if (!offices) {
           throw new Error("Помилка: Дані офісів наразі недоступні. Скоріше за все жоден офіс не працює.");
@@ -59,9 +57,6 @@ function retrieveValues(data, token, setReceivedCallback, setMessageCallback) {
               office.cntslots = office_values.cntslots;
               office.minm = office_values.minm;
               office.maxm = office_values.maxm;
-            }
-            else {
-              //console.log('Skipping missing office ' + office.offices_n);
             }
           }
         }
@@ -87,17 +82,12 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
     const ref = useRef();
     
     const draw = () => {
-      //console.log('Data');
-      //console.log(data);
-
       const svg = d3.select(ref.current);
       svg.selectAll("*").remove();
       svg
         .attr('width', width).attr('height', height)
 
       let hierarchy = {'children': data};
-      //console.log('Hierarchy'); 
-      //console.log(hierarchy);
 
       // Give the data to this cluster layout:
       var root = d3.hierarchy(hierarchy).sum(d => d.size);
