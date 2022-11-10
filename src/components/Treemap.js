@@ -188,11 +188,12 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
         { receivedValues 
         ? <div>
             <svg ref={ref} id={"treemap-svg"}/>
-            <LegendThreshold
+            { selectedOption == 'accuracy' ?
+              <LegendThreshold
               scale={color}
               direction="row"
               itemDirection="column"
-              labelMargin="-20px 0 0 0"
+              labelMargin="-22px 0 0 0"
               labelAlign="center"
               labelLower='Менш ніж '
               labelUpper='Більш ніж '
@@ -200,6 +201,20 @@ function Treemap({ width, height, data, token, selectedOption, setSelectedOffice
               shapeHeight="25px"
               shapeWidth="75px"
             />
+            :
+            <LegendThreshold
+              scale={colorHundred}
+              direction="row"
+              itemDirection="column"
+              labelMargin="-22px 0 0 0"
+              labelAlign="center"
+              labelLower='Менш ніж '
+              labelUpper='Більш ніж '
+              labelDelimiter='до'
+              shapeHeight="25px"
+              shapeWidth="100px"
+            />
+            }
             </div>
         : <h1>{message}</h1>
         }
